@@ -1,0 +1,18 @@
+          <g class="fp-plane" data-show="plane" stroke="#000" stroke-width="3" stroke-linejoin="round">
+            <clipPath id="fp-fin"><path d="M496 94 L566 8 L606 8 L592 94 Z"/></clipPath>
+            <path d="M496 94 L566 8 L606 8 L592 94 Z" style="fill:var(--tail)"/>
+            <g clip-path="url(#fp-fin)" stroke="none">
+              <path d="M520 94 L590 8 L604 8 L534 94 Z" style="fill:var(--s1)"/>
+              <path d="M546 94 L616 8 L630 8 L560 94 Z" style="fill:var(--s2)"/>
+              <path d="M572 94 L642 8 L656 8 L586 94 Z" style="fill:var(--s1)"/>
+            </g>
+            <path d="M496 94 L566 8 L606 8 L592 94 Z" fill="none"/>
+            <path d="M28 124 C30 104 58 94 104 93 L540 92 L620 80 L612 112 C596 130 566 142 520 143 L100 143 C58 143 26 138 28 124 Z" fill="#fff"/>
+            <path d="M48 112 L72 106 L76 113 L46 117 Z" fill="#000" stroke-width="1"/>
+            <rect x="120" y="114" width="340" height="10" rx="5" stroke="none" style="fill:var(--body)"/>
+            <rect x="120" y="127" width="340" height="4" rx="2" stroke="none" style="fill:var(--s2)"/>
+            <path d="M548 112 L604 104 L618 114 L566 120 Z" fill="#fff"/>
+            <path d="M270 132 L360 132 L440 180 L420 184 Z" fill="#fff"/>
+            <rect x="258" y="146" width="78" height="32" rx="14" fill="#fff"/>
+            <ellipse cx="262" cy="162" rx="8" ry="16" fill="#fff"/>
+          </g>

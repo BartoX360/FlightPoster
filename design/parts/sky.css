@@ -1,0 +1,36 @@
+  /* --- Ciel : lumière du jour et météo (commun à toutes les mises en page) --- */
+  .fp { --sky: #ccddee; --sun: #ffcc44; --sun-stroke: none; --cloud: #ffffff; --cloud-stroke: none; --star: #eeeedd;
+        --rain: #5577aa; --snow: #ffffff; --snow-stroke: none; --fog: #ffffff; --glow: #ffcc88; --bolt: #ffcc44;
+        --tail: #ffffff; --s1: #8a8f99; --s2: #c9ccd2; --body: #8a8f99; --sky-ink: #223344; }
+  .fp--grey { --sky: #aabbcc; --cloud: #e6e9ee; }
+  .fp--wx-storm { --sky: #8899aa; --cloud: #667788; }
+  .fp--dusk { --sky: #ee9977; --sun: #ee5533; --sky-ink: #442233; }
+  .fp--dusk.fp--grey { --sky: #887799; --cloud: #aa99aa; --glow: #aa8899; --rain: #eeeedd; --sky-ink: #eeeedd; }
+  .fp--night { --sky: #223344; --sun: #eeeedd; --cloud: #445566; --rain: #8899bb; --sky-ink: #ccddee; }
+  .fp--night.fp--grey { --sky: #2a3038; --cloud: #3d4550; }
+
+  .fp.fp--eink { --sky: #ffffff; --sun: url(#fp-hatch); --sun-stroke: #000000; --cloud: #ffffff; --cloud-stroke: #000000;
+                 --tail: #ffffff; --s1: #000000; --s2: #000000; --body: #000000; --sky-ink: #000000;
+                 --rain: #000000; --snow: #ffffff; --snow-stroke: #000000; --fog: #000000; --bolt: #000000; --glow: url(#fp-lines); }
+  .fp.fp--eink.fp--grey, .fp.fp--eink.fp--dusk { --sky: #ffffff; --cloud: #ffffff; --sun: url(#fp-hatch); --rain: #000000; --sky-ink: #000000; }
+  .fp.fp--eink.fp--wx-storm { --sky: #ffffff; --cloud: #000000; }
+  .fp.fp--eink.fp--night { --sky: #000000; --sun: #ffffff; --sun-stroke: none; --cloud: #000000; --cloud-stroke: #ffffff;
+                           --star: #ffffff; --rain: #ffffff; --snow: #ffffff; --snow-stroke: #ffffff; --fog: #ffffff; --bolt: #ffffff;
+                           --sky-ink: #ffffff; }
+
+  .fp-sky { background: var(--sky); overflow: hidden; }
+  .fp-sky > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .fp-sky .wx { display: none; }
+  .fp--day .fp-sun, .fp--dusk .fp-sun, .fp--night .fp-moon, .fp--night .fp-stars,
+  .fp--dusk .fp-glow, .fp--eink.fp--wx-overcast:not(.fp--night) .fp-dots,
+  .fp--wx-cloudy .fp-clouds-more, .fp--grey .fp-clouds-more,
+  .fp--wx-rain .fp-rain, .fp--wx-storm .fp-rain, .fp--wx-snow .fp-snow, .fp--wx-fog .fp-fog,
+  .fp--wx-storm .fp-bolt { display: inline; }
+  .fp--grey .fp-sun, .fp--grey .fp-moon, .fp--grey .fp-stars { display: none; }
+
+  /* états : data-show="plane | empty | error | empty error | plane route | plane noroute | route | noroute" (masquage uniquement) */
+  .fp:not(.fp--plane) [data-show="plane"], .fp:not(.fp--plane) [data-show="plane route"], .fp:not(.fp--plane) [data-show="plane noroute"],
+  .fp:not(.fp--empty) [data-show="empty"], .fp:not(.fp--error) [data-show="error"],
+  .fp:not(.fp--empty):not(.fp--error) [data-show="empty error"],
+  .fp--noroute [data-show~="route"], .fp--route [data-show~="noroute"], .fp:not(.fp--plane) [data-show="noroute"] { display: none !important; }
+  .fp-fit { white-space: nowrap; overflow: hidden; }

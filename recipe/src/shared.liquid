@@ -1,0 +1,511 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=IBM+Plex+Mono:wght@400;500;600&display=block" rel="stylesheet">
+<style>
+  .view:has(> .fp) { position: relative; padding: 0; overflow: hidden; }
+  .fp { position: absolute; inset: 0; overflow: hidden; container-type: size;
+        --bg: #f2eee6; --ink: #111111; --muted: #444455; --sky: #ccddee; --top: #444455;
+        --sun: #ffcc44; --sun-stroke: none; --cloud: #ffffff; --cloud-stroke: none; --star: #eeeedd; --accent: #dd2233;
+        --tail: #ffffff; --s1: #8a8f99; --s2: #c9ccd2; --body: #8a8f99;
+        --sky-h: 67.5%; --pad: 4.4cqw; --f-top: max(11px, 1.35cqw); --f-meta: max(12px, 1.45cqw);
+        --f-route: 6.6cqw; --f-sub: max(12px, 1.5cqw); --compass: min(9cqw, 15cqh);
+        background: var(--bg); color: var(--ink); font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+  .fp { --rain: #5577aa; --snow: #ffffff; --snow-stroke: none; --fog: #ffffff; --glow: #ffcc88; --bolt: #ffcc44; }
+  .fp--grey { --sky: #aabbcc; --cloud: #e6e9ee; }
+  .fp--wx-storm { --sky: #8899aa; --cloud: #667788; }
+  .fp--dusk { --sky: #ee9977; --sun: #ee5533; --top: #442233; }
+  .fp--dusk.fp--grey { --sky: #887799; --cloud: #aa99aa; --glow: #aa8899; --top: #eeeedd; --rain: #eeeedd; }
+  .fp--night { --sky: #223344; --top: #ccddee; --sun: #eeeedd; --cloud: #445566; --rain: #8899bb; }
+  .fp--night.fp--grey { --sky: #2a3038; --cloud: #3d4550; }
+
+  .fp.fp--eink { --bg: #ffffff; --ink: #000000; --muted: #000000; --sky: #ffffff; --top: #000000; --sun: url(#fp-hatch);
+              --sun-stroke: #000000; --cloud: #ffffff; --cloud-stroke: #000000; --accent: #000000;
+              --tail: #ffffff; --s1: #000000; --s2: #000000; --body: #000000;
+              --rain: #000000; --snow: #ffffff; --snow-stroke: #000000; --fog: #000000; --bolt: #000000; --glow: url(#fp-lines); }
+  .fp.fp--eink.fp--grey, .fp.fp--eink.fp--dusk { --sky: #ffffff; --top: #000000; --cloud: #ffffff; --sun: url(#fp-hatch); --rain: #000000; }
+  .fp.fp--eink.fp--wx-storm { --sky: #ffffff; --cloud: #000000; }
+  .fp.fp--eink.fp--night { --sky: #000000; --top: #ffffff; --sun: #ffffff; --sun-stroke: none; --cloud: #000000;
+                        --cloud-stroke: #ffffff; --star: #ffffff; --rain: #ffffff; --snow: #ffffff; --snow-stroke: #ffffff;
+                        --fog: #ffffff; --bolt: #ffffff; }
+
+  /* calques du ciel selon la lumière et la météo */
+  .fp-sky .wx { display: none; }
+  .fp--day .fp-sun, .fp--dusk .fp-sun, .fp--night .fp-moon, .fp--night .fp-stars,
+  .fp--dusk .fp-glow, .fp--eink.fp--wx-overcast:not(.fp--night) .fp-dots,
+  .fp--wx-cloudy .fp-clouds-more, .fp--grey .fp-clouds-more,
+  .fp--wx-rain .fp-rain, .fp--wx-storm .fp-rain, .fp--wx-snow .fp-snow, .fp--wx-fog .fp-fog,
+  .fp--wx-storm .fp-bolt { display: inline; }
+  .fp--grey .fp-sun, .fp--grey .fp-moon, .fp--grey .fp-stars { display: none; }
+
+  .fp-sky { position: absolute; left: 0; right: 0; top: 0; height: var(--sky-h); background: var(--sky); overflow: hidden; }
+  .fp-sky > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .fp-art { position: absolute; left: 8%; right: 8%; top: 16%; bottom: 6%; }
+  .fp-art svg { width: 100%; height: 100%; }
+  .fp-top { position: absolute; top: calc(var(--pad) * .6); left: var(--pad); right: var(--pad); display: flex;
+            justify-content: space-between; gap: 2em; font-size: var(--f-top); letter-spacing: .28em;
+            text-transform: uppercase; color: var(--top); white-space: nowrap; }
+  .fp-top > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+  .fp-upd-short { display: none; }
+  .fp--half_horizontal .fp-upd-long, .fp--half_vertical .fp-upd-long, .fp--quadrant .fp-upd-long { display: none; }
+  .fp--half_horizontal .fp-upd-short, .fp--half_vertical .fp-upd-short, .fp--quadrant .fp-upd-short { display: inline; }
+
+  .fp-info { position: absolute; left: var(--pad); right: var(--pad); top: var(--sky-h); bottom: 0;
+             border-top: max(2px, .25cqw) solid var(--ink); display: flex; align-items: center; gap: 3cqw; }
+  .fp-text { flex: 1 1 auto; min-width: 0; }
+  .fp-meta { font-size: var(--f-meta); letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fp-route { font-family: 'Archivo', 'Arial Black', sans-serif; font-weight: 900; font-size: var(--f-route);
+              line-height: 1.05; text-transform: uppercase; margin: .18em 0 .14em; white-space: nowrap; overflow: hidden; }
+  .fp-route .arrow { font-weight: 400; margin: 0 .15em; }
+  .fp-sub { font-size: var(--f-sub); color: var(--muted); letter-spacing: .03em; }
+  .fp-sub b { color: var(--ink); font-weight: 500; }
+  .fp-compass { flex: 0 0 auto; text-align: center; font-size: var(--f-top); letter-spacing: .2em; color: var(--muted); }
+  .fp-compass svg { display: block; width: var(--compass); height: var(--compass); margin: .4em auto; }
+  .fp-tag { display: inline-block; text-transform: uppercase; border: 2px solid var(--ink); border-radius: .4em; padding: .4em .9em; color: var(--ink);
+            font-size: var(--f-top); letter-spacing: .2em; }
+  .fp-err .fp-meta { color: var(--accent); }
+  .fp [data-show] { display: none; }
+  .fp--plane [data-show~="plane"], .fp--empty [data-show~="empty"], .fp--error [data-show~="error"] { display: revert; }
+  .fp--plane .fp-compass[data-show~="plane"], .fp--empty .fp-compass[data-show~="empty"] { display: block; }
+  /* e-ink 1 bit : pas d'anticrénelage, il faut des traits plus épais */
+  .fp--eink { font-weight: 600; --f-top: max(13px, 1.35cqw); --f-meta: max(13px, 1.45cqw); --f-sub: max(13px, 1.5cqw); }
+  .fp--eink .fp-sub b { font-weight: 600; }
+  .fp--eink .fp-top, .fp--eink .fp-meta { letter-spacing: .14em; }
+
+  .fp--half_horizontal { --pad: 3cqw; --f-route: 5cqw; --compass: 30cqh; }
+  .fp--half_horizontal .fp-sky { right: auto; width: 34%; height: 100%; border-right: max(2px, .25cqw) solid var(--ink); }
+  .fp--half_horizontal .fp-art { left: 4%; right: 4%; top: 20%; bottom: 6%; }
+  .fp--half_horizontal .fp-info { left: calc(34% + var(--pad)); top: 0; border-top: 0; }
+  .fp--half_horizontal .fp-top > span:first-child, .fp--half_vertical .fp-top > span:first-child { display: none; }
+  .fp--half_horizontal .fp-top, .fp--half_vertical .fp-top { justify-content: flex-end; }
+  .fp--half_horizontal .fp-sub { line-height: 1.5; }
+  .fp--half_vertical { --sky-h: 42%; --pad: 5cqw; --f-top: max(11px, 2.6cqw); --f-meta: max(11px, 2.9cqw);
+                       --f-route: 11cqw; --f-sub: max(12px, 3.2cqw); }
+  .fp--half_vertical .fp-art { left: 4%; right: 4%; top: 18%; }
+  .fp--half_vertical .fp-meta { white-space: normal; line-height: 1.5; }
+  .fp--half_vertical .fp-info { align-items: flex-start; padding-top: 6cqw; }
+  .fp--half_vertical .fp-sub { line-height: 1.5; }
+  .fp--half_vertical .fp-top, .fp--quadrant .fp-top { letter-spacing: .1em; }
+  .fp--half_vertical .fp-compass, .fp--quadrant .fp-compass { display: none !important; }
+  .fp--quadrant { --sky-h: 44%; --pad: 4.5cqw; --f-top: max(11px, 2.8cqw); --f-meta: max(11px, 2.8cqw);
+                  --f-route: 9cqw; --f-sub: max(11px, 2.8cqw); }
+  .fp--quadrant .fp-art { left: 4%; right: 4%; top: 24%; bottom: 4%; }
+  .fp--quadrant .fp-top > span:first-child { display: none; }
+  .fp--quadrant .fp-top { justify-content: flex-end; }
+  .fp--quadrant .fp-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+
+{% template flightposter %}
+<div class="fp fp--{{ size }}{% if cf.style == 'color' %} fp--color{% else %} fp--eink{% endif %}"
+     data-lat="{{ cf.lat }}" data-lon="{{ cf.lon }}" data-radius="{{ cf.radius_km | default: 25 }}"
+     data-prefer="{{ cf.prefer_airliners | default: 'yes' }}" data-lang="{{ cf.language | default: 'en' }}"
+     data-units="{{ cf.units | default: 'metric' }}" data-ts="{{ ts }}" data-off="{{ off | default: 0 }}">
+  <script type="application/json" class="fp-data">{{ aircraft | json }}</script>
+  <script type="application/json" class="fp-wx-data">{{ weather | json }}</script>
+  <div class="fp-sky">
+    <svg viewBox="0 0 1280 540" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="fp-hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="9" height="9" fill="#fff"/><rect width="3" height="9" fill="#000"/>
+        </pattern>
+        <pattern id="fp-lines" width="12" height="15" patternUnits="userSpaceOnUse">
+          <rect width="12" height="15" fill="#fff"/><rect width="12" height="2" fill="#000"/>
+        </pattern>
+        <pattern id="fp-dots" width="16" height="16" patternUnits="userSpaceOnUse">
+          <circle cx="4" cy="4" r="1.6" fill="#000"/><circle cx="12" cy="12" r="1.6" fill="#000"/>
+        </pattern>
+        <pattern id="fp-fog-p" width="300" height="70" patternUnits="userSpaceOnUse">
+          <path d="M10 14 H150 M170 50 H280" style="stroke:var(--fog)" stroke-width="4" stroke-linecap="round" stroke-dasharray="40 14"/>
+        </pattern>
+        <g id="fp-cloud"><path d="M30 64 a24 24 0 0 1 4-47 a34 34 0 0 1 62-6 a26 26 0 0 1 38 26 a16 16 0 0 1 2 27 Z"/></g>
+      </defs>
+      <rect class="wx fp-dots" x="0" y="0" width="1280" height="540" fill="url(#fp-dots)" opacity=".9"/>
+      <rect class="wx fp-glow" x="0" y="330" width="1280" height="210" style="fill:var(--glow)"/>
+      <g class="wx fp-stars" style="fill:var(--star)">
+        <circle cx="140" cy="130" r="2"/><circle cx="310" cy="210" r="1.6"/><circle cx="420" cy="110" r="2.2"/>
+        <circle cx="980" cy="150" r="1.8"/><circle cx="1130" cy="250" r="2"/><circle cx="860" cy="90" r="1.5"/>
+        <circle cx="230" cy="350" r="1.5"/><circle cx="1060" cy="390" r="1.7"/><circle cx="560" cy="80" r="1.4"/>
+      </g>
+      <g class="wx fp-rain" style="stroke:var(--rain)" stroke-linecap="round"></g>
+      <g class="wx fp-snow" style="fill:var(--snow);stroke:var(--snow-stroke)" stroke-width="2"></g>
+      <g style="fill:var(--cloud);stroke:var(--cloud-stroke);stroke-width:3">
+        <g class="wx fp-clouds-more">
+          <use href="#fp-cloud" transform="translate(-30 105) scale(1.5)"/>
+          <use href="#fp-cloud" transform="translate(330 90) scale(1.6)"/>
+          <use href="#fp-cloud" transform="translate(700 100) scale(1.4)"/>
+          <use href="#fp-cloud" transform="translate(1040 85) scale(1.5)"/>
+          <use href="#fp-cloud" transform="translate(520 330) scale(1.3)"/>
+        </g>
+        <use href="#fp-cloud" transform="translate(150 250) scale(1.2)"/>
+        <use href="#fp-cloud" transform="translate(930 190) scale(.9)"/>
+        <use href="#fp-cloud" transform="translate(1010 400) scale(1.1)"/>
+        <use href="#fp-cloud" transform="translate(80 420) scale(.7)"/>
+      </g>
+      <path class="wx fp-bolt" d="M372 150 L322 262 L356 262 L330 360 L424 228 L386 228 L414 150 Z"
+            style="fill:var(--bolt);stroke:var(--cloud-stroke)" stroke-width="3" stroke-linejoin="round"/>
+      <rect class="wx fp-fog" x="0" y="190" width="1280" height="350" fill="url(#fp-fog-p)"/>
+    </svg>
+    <div class="fp-art">
+      <svg viewBox="0 -40 660 250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <g class="fp-flip">
+          <g class="wx fp-sun" style="fill:var(--sun);stroke:var(--sun-stroke);stroke-width:3">
+            <circle class="fp-sun-disc" cx="383" cy="48" r="61"/>
+          </g>
+          <g class="wx fp-moon">
+            <circle cx="383" cy="44" r="54" style="fill:var(--sun)"/>
+            <circle cx="405" cy="29" r="49" style="fill:var(--sky)"/>
+          </g>
+          <g class="fp-plane" data-show="plane" stroke="#000" stroke-width="3" stroke-linejoin="round">
+            <clipPath id="fp-fin"><path d="M496 94 L566 8 L606 8 L592 94 Z"/></clipPath>
+            <path d="M496 94 L566 8 L606 8 L592 94 Z" style="fill:var(--tail)"/>
+            <g clip-path="url(#fp-fin)" stroke="none">
+              <path d="M520 94 L590 8 L604 8 L534 94 Z" style="fill:var(--s1)"/>
+              <path d="M546 94 L616 8 L630 8 L560 94 Z" style="fill:var(--s2)"/>
+              <path d="M572 94 L642 8 L656 8 L586 94 Z" style="fill:var(--s1)"/>
+            </g>
+            <path d="M496 94 L566 8 L606 8 L592 94 Z" fill="none"/>
+            <path d="M28 124 C30 104 58 94 104 93 L540 92 L620 80 L612 112 C596 130 566 142 520 143 L100 143 C58 143 26 138 28 124 Z" fill="#fff"/>
+            <path d="M48 112 L72 106 L76 113 L46 117 Z" fill="#000" stroke-width="1"/>
+            <rect x="120" y="114" width="340" height="10" rx="5" stroke="none" style="fill:var(--body)"/>
+            <rect x="120" y="127" width="340" height="4" rx="2" stroke="none" style="fill:var(--s2)"/>
+            <path d="M548 112 L604 104 L618 114 L566 120 Z" fill="#fff"/>
+            <path d="M270 132 L360 132 L440 180 L420 184 Z" fill="#fff"/>
+            <rect x="258" y="146" width="78" height="32" rx="14" fill="#fff"/>
+            <ellipse cx="262" cy="162" rx="8" ry="16" fill="#fff"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="fp-top">
+      <span><span class="fp-k"></span><span class="fp-city">{{ cf.city }}</span></span>
+      <span class="fp-upd"><span class="fp-upd-long"></span><span class="fp-upd-short"></span><span class="fp-time">--:--</span></span>
+    </div>
+  </div>
+  <div class="fp-info">
+    <div class="fp-text">
+      <div class="fp-meta"></div>
+      <div class="fp-route"></div>
+      <div class="fp-sub"></div>
+    </div>
+    <div class="fp-compass" data-show="plane">
+      N
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="54" fill="none" style="stroke:var(--ink)" stroke-width="3"/>
+        <g class="fp-needle"><path d="M60 18 L72 66 L60 58 L48 66 Z" style="fill:var(--accent)"/>
+          <circle cx="60" cy="60" r="5" style="fill:var(--ink)"/></g>
+      </svg>
+      <span class="fp-reg"></span>
+    </div>
+    <div class="fp-compass" data-show="empty"><span class="fp-tag"></span></div>
+  </div>
+</div>
+{% endtemplate %}
+
+<script>
+(function () {
+  var TYPES = {
+    A318: 'Airbus A318', A319: 'Airbus A319', A320: 'Airbus A320', A321: 'Airbus A321', A19N: 'Airbus A319neo',
+    A20N: 'Airbus A320neo', A21N: 'Airbus A321neo', A332: 'Airbus A330-200', A333: 'Airbus A330-300',
+    A338: 'Airbus A330-800neo', A339: 'Airbus A330-900neo', A343: 'Airbus A340-300', A346: 'Airbus A340-600',
+    A359: 'Airbus A350-900', A35K: 'Airbus A350-1000', A388: 'Airbus A380-800', BCS1: 'Airbus A220-100',
+    BCS3: 'Airbus A220-300', B737: 'Boeing 737-700', B738: 'Boeing 737-800', B739: 'Boeing 737-900',
+    B37M: 'Boeing 737 MAX 7', B38M: 'Boeing 737 MAX 8', B39M: 'Boeing 737 MAX 9', B752: 'Boeing 757-200',
+    B763: 'Boeing 767-300', B772: 'Boeing 777-200', B77W: 'Boeing 777-300ER', B77L: 'Boeing 777-200LR',
+    B788: 'Boeing 787-8', B789: 'Boeing 787-9', B78X: 'Boeing 787-10', B744: 'Boeing 747-400', B748: 'Boeing 747-8',
+    E170: 'Embraer 170', E175: 'Embraer 175', E190: 'Embraer 190', E195: 'Embraer 195', E290: 'Embraer E190-E2',
+    E295: 'Embraer E195-E2', CRJ7: 'Bombardier CRJ700', CRJ9: 'Bombardier CRJ900', CRJX: 'Bombardier CRJ1000',
+    AT72: 'ATR 72', AT76: 'ATR 72-600', AT75: 'ATR 72-500', AT45: 'ATR 42-500', AT46: 'ATR 42-600',
+    DH8D: 'De Havilland Dash 8-400'
+  };
+  var CITY_FR = {
+    'Mexico City': 'Mexico', 'London': 'Londres', 'Geneva': 'Genève', 'Brussels': 'Bruxelles', 'Venice': 'Venise',
+    'Lisbon': 'Lisbonne', 'Seville': 'Séville', 'Athens': 'Athènes', 'Copenhagen': 'Copenhague', 'Vienna': 'Vienne',
+    'Warsaw': 'Varsovie', 'Moscow': 'Moscou', 'Cairo': 'Le Caire', 'Algiers': 'Alger', 'Marrakesh': 'Marrakech',
+    'Beijing': 'Pékin', 'Montreal': 'Montréal', 'Basel': 'Bâle', 'Edinburgh': 'Édimbourg',
+    'Palma De Mallorca': 'Palma', 'Palma de Mallorca': 'Palma', 'Saint Petersburg': 'Saint-Pétersbourg',
+    'Bucharest': 'Bucarest', 'Barcelona': 'Barcelone', 'Frankfurt': 'Francfort', 'Hamburg': 'Hambourg', 'Stockholm': 'Stockholm',
+    'Valencia': 'Valence', 'Turin': 'Turin', 'Genoa': 'Gênes', 'Tangier': 'Tanger', 'Fez': 'Fès', 'Antwerp': 'Anvers',
+    'Krakow': 'Cracovie', 'Dubrovnik': 'Dubrovnik', 'Reykjavik': 'Reykjavik', 'Mumbai': 'Bombay', 'Beirut': 'Beyrouth', 'Singapore': 'Singapour', 'The Hague': 'La Haye', 'Gothenburg': 'Göteborg', 'Malta': 'Malte'
+  };
+  // [dérive, bande 1, bande 2, liseré fuselage] — utilisé en mode couleur uniquement
+  var LIVERIES = {
+    AFR: ['#ffffff', '#1d3f8f', '#d62631', '#1d3f8f'], HOP: ['#ffffff', '#1d3f8f', '#d62631', '#1d3f8f'],
+    TVF: ['#00a88e', '#ffffff', '#7fd4c6', '#00a88e'], EZY: ['#ff6600', '#ffffff', '#ff6600', '#ff6600'],
+    EJU: ['#ff6600', '#ffffff', '#ff6600', '#ff6600'], EZS: ['#ff6600', '#ffffff', '#ff6600', '#ff6600'],
+    RYR: ['#073590', '#f1c933', '#073590', '#073590'], RUK: ['#073590', '#f1c933', '#073590', '#073590'],
+    DLH: ['#05164d', '#f9ba00', '#05164d', '#05164d'], SWR: ['#e30613', '#ffffff', '#e30613', '#e30613'],
+    BAW: ['#ffffff', '#c8102e', '#075aaa', '#075aaa'], CFE: ['#ffffff', '#c8102e', '#075aaa', '#075aaa'],
+    SHT: ['#ffffff', '#c8102e', '#075aaa', '#075aaa'], EFW: ['#ffffff', '#c8102e', '#075aaa', '#075aaa'], KLM: ['#00a1de', '#ffffff', '#00a1de', '#00a1de'],
+    VLG: ['#ffcc00', '#4d4d4d', '#ffcc00', '#4d4d4d'], IBE: ['#d7192d', '#ffcc00', '#d7192d', '#d7192d'],
+    ITY: ['#0047bb', '#00a650', '#0047bb', '#0047bb'], UAE: ['#ffffff', '#00843d', '#d71a21', '#d71a21'],
+    QTR: ['#5c0632', '#ffffff', '#5c0632', '#5c0632'], THY: ['#c8102e', '#ffffff', '#c8102e', '#c8102e'],
+    TAP: ['#d6001c', '#00a651', '#d6001c', '#00a651'], AUA: ['#d81e05', '#ffffff', '#d81e05', '#d81e05'],
+    SAS: ['#000f9f', '#ffffff', '#000f9f', '#000f9f'], NSZ: ['#d81939', '#ffffff', '#d81939', '#d81939'],
+    NOZ: ['#d81939', '#ffffff', '#d81939', '#d81939'], WZZ: ['#c6007e', '#25296c', '#c6007e', '#c6007e'],
+    WMT: ['#c6007e', '#25296c', '#c6007e', '#c6007e'], WUK: ['#c6007e', '#25296c', '#c6007e', '#c6007e'],
+    WAZ: ['#c6007e', '#25296c', '#c6007e', '#c6007e'], VOE: ['#ffffff', '#e3007b', '#2d2d2d', '#e3007b'],
+    EWG: ['#a5027d', '#ffffff', '#a5027d', '#a5027d'], BCY: ['#00a0e2', '#ffffff', '#00a0e2', '#00a0e2'],
+    TRA: ['#00d66c', '#ffffff', '#00d66c', '#00d66c'], TOM: ['#70cbf4', '#d40e14', '#70cbf4', '#d40e14'],
+    DAL: ['#003366', '#c8102e', '#003366', '#c8102e'], UAL: ['#002244', '#ffffff', '#002244', '#002244'],
+    AAL: ['#c30019', '#0078d2', '#c30019', '#0078d2'], ACA: ['#000000', '#d22630', '#000000', '#d22630'],
+    ETD: ['#bd8b13', '#ffffff', '#bd8b13', '#bd8b13'], CFG: ['#fbb900', '#f5f5f5', '#fbb900', '#fbb900'],
+    BEL: ['#003366', '#e30613', '#003366', '#e30613'], AEE: ['#003d7d', '#ffffff', '#003d7d', '#003d7d'],
+    LOT: ['#11397e', '#ffffff', '#11397e', '#11397e'], FDX: ['#4d148c', '#ff6600', '#4d148c', '#ff6600'],
+    UPS: ['#351c15', '#ffb500', '#351c15', '#ffb500'], DHK: ['#ffcc00', '#d40511', '#ffcc00', '#d40511']
+  };
+  // Noms et codes IATA des compagnies courantes (évite un appel réseau)
+  var AIRLINES = {
+    AFR: ['Air France', 'AF'], HOP: ['Air France Hop', 'A5'], TVF: ['Transavia France', 'TO'], TRA: ['Transavia', 'HV'],
+    EZY: ['easyJet', 'U2'], EJU: ['easyJet Europe', 'EC'], EZS: ['easyJet Switzerland', 'DS'], RYR: ['Ryanair', 'FR'],
+    RUK: ['Ryanair UK', 'RK'], DLH: ['Lufthansa', 'LH'], SWR: ['Swiss', 'LX'], BAW: ['British Airways', 'BA'],
+    CFE: ['BA CityFlyer', 'BA'], KLM: ['KLM', 'KL'], VLG: ['Vueling', 'VY'], IBE: ['Iberia', 'IB'], ITY: ['ITA Airways', 'AZ'],
+    UAE: ['Emirates', 'EK'], QTR: ['Qatar Airways', 'QR'], THY: ['Turkish Airlines', 'TK'], TAP: ['TAP Air Portugal', 'TP'],
+    AUA: ['Austrian', 'OS'], SAS: ['SAS', 'SK'], NSZ: ['Norwegian', 'D8'], NOZ: ['Norwegian', 'DY'], WZZ: ['Wizz Air', 'W6'],
+    WMT: ['Wizz Air Malta', 'W4'], WUK: ['Wizz Air UK', 'W9'], VOE: ['Volotea', 'V7'], EWG: ['Eurowings', 'EW'],
+    BCY: ['CityJet', 'WX'], TOM: ['TUI Airways', 'BY'], DAL: ['Delta', 'DL'], UAL: ['United', 'UA'], AAL: ['American', 'AA'],
+    ACA: ['Air Canada', 'AC'], ETD: ['Etihad', 'EY'], CFG: ['Condor', 'DE'], BEL: ['Brussels Airlines', 'SN'],
+    AEE: ['Aegean', 'A3'], LOT: ['LOT', 'LO'], FIN: ['Finnair', 'AY'], AMX: ['Aeroméxico', 'AM'], AEA: ['Air Europa', 'UX'],
+    FDX: ['FedEx', 'FX'], UPS: ['UPS', '5X'], DHK: ['DHL', 'D0'], NJE: ['NetJets Europe', '1I']
+  };
+
+  var I18N = {
+    fr: {
+      sky: 'Le ciel au-dessus de ', home: 'chez moi', updated: 'Dernière actualisation à ', upd: 'Màj ', standby: 'En attente',
+      wx: { clear: 'Ciel dégagé', cloudy: 'Éclaircies', overcast: 'Ciel couvert', fog: 'Brouillard', rain: 'Pluie', snow: 'Neige', storm: 'Orage' },
+      radius: function (r) { return 'rayon de ' + r; }, none: 'Aucun avion', nearest: 'Le plus proche : ', quiet: "Le ciel est calme pour l'instant.",
+      at: function (d, w) { return 'à\u00a0' + d + ' ' + w; }, alt: " d'altitude",
+      phase: { climb: 'en montée', descent: 'en descente', cruise: 'en croisière', level: 'en palier' },
+      compass: ['au nord', 'au nord-est', "à l'est", 'au sud-est', 'au sud', 'au sud-ouest', "à l'ouest", 'au nord-ouest'],
+      offlineMeta: 'Radar indisponible', offline: 'Hors ligne', noCoords: 'Renseignez la latitude et la longitude dans les réglages.',
+      noFeed: 'Impossible de joindre adsb.fi pour le moment.', private: 'Vol privé', unknownAc: 'Appareil inconnu', noRoute: 'Itinéraire inconnu',
+      thousands: '\u202f', decimal: ','
+    },
+    en: {
+      sky: 'The sky above ', home: 'home', updated: 'Last updated at ', upd: 'Upd. ', standby: 'Standing by',
+      wx: { clear: 'Clear sky', cloudy: 'Partly cloudy', overcast: 'Overcast', fog: 'Fog', rain: 'Rain', snow: 'Snow', storm: 'Thunderstorm' },
+      radius: function (r) { return r + ' radius'; }, none: 'No planes', nearest: 'Nearest: ', quiet: 'The sky is quiet for now.',
+      at: function (d, w) { return d + ' ' + w; }, alt: ' altitude',
+      phase: { climb: 'climbing', descent: 'descending', cruise: 'cruising', level: 'level flight' },
+      compass: ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'],
+      offlineMeta: 'Radar unavailable', offline: 'Offline', noCoords: 'Set your latitude and longitude in the plugin settings.',
+      noFeed: 'Unable to reach adsb.fi right now.', private: 'Private flight', unknownAc: 'Unknown aircraft', noRoute: 'Route unknown',
+      thousands: ',', decimal: '.'
+    }
+  };
+
+  function rad(d) { return d * Math.PI / 180; }
+  function distKm(a, b, c, d) {
+    var x = Math.sin(rad(c - a) / 2), y = Math.sin(rad(d - b) / 2);
+    var h = x * x + Math.cos(rad(a)) * Math.cos(rad(c)) * y * y;
+    return 12742 * Math.asin(Math.sqrt(h));
+  }
+  function bearing(a, b, c, d) {
+    var y = Math.sin(rad(d - b)) * Math.cos(rad(c));
+    var x = Math.cos(rad(a)) * Math.sin(rad(c)) - Math.sin(rad(a)) * Math.cos(rad(c)) * Math.cos(rad(d - b));
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+  function sunElevation(lat, lon, date) {
+    var start = Date.UTC(date.getUTCFullYear(), 0, 1);
+    var doy = Math.floor((date - start) / 864e5) + 1, hour = date.getUTCHours() + date.getUTCMinutes() / 60;
+    var g = 2 * Math.PI / 365 * (doy - 1 + (hour - 12) / 24);
+    var decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g)
+      + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+    var eqt = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g)
+      - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+    var ha = rad((hour * 60 + eqt + 4 * lon) / 4 - 180), la = rad(lat);
+    var cz = Math.sin(la) * Math.sin(decl) + Math.cos(la) * Math.cos(decl) * Math.cos(ha);
+    return 90 - Math.acos(Math.max(-1, Math.min(1, cz))) * 180 / Math.PI;
+  }
+  function fmt(n, t, digits) {
+    var parts = n.toFixed(digits || 0).split('.');
+    return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, t.thousands) + (parts[1] ? t.decimal + parts[1] : '');
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
+  function titleCase(s) { return s.toLowerCase().replace(/(^|[\s-])([a-z])/g, function (m, a, b) { return a + b.toUpperCase(); }); }
+  function isAirliner(a) { return /^[A-Z]{3}\d/.test(a.cs) && /^A[2-5]$/.test(a.category || 'A3'); }
+  function getJSON(url, ms) {
+    return Promise.race([
+      fetch(url).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+      new Promise(function (res) { setTimeout(function () { res(null); }, ms); })
+    ]);
+  }
+  function fit(el) {
+    el.style.fontSize = '';
+    var size = parseFloat(getComputedStyle(el).fontSize), min = size * 0.4;
+    while (el.scrollWidth > el.clientWidth + 1 && size > min) { size *= 0.94; el.style.fontSize = size + 'px'; }
+  }
+
+  function render(root) {
+    root.setAttribute('data-done', '1');
+    var q = function (s) { return root.querySelector(s); };
+    var t = I18N[root.dataset.lang] || I18N.en, fr = t === I18N.fr, imperial = root.dataset.units === 'imperial';
+    var lat = parseFloat(root.dataset.lat), lon = parseFloat(root.dataset.lon);
+    var radius = parseFloat(root.dataset.radius) || 25, prefer = root.dataset.prefer !== 'no';
+    var ts = parseInt(root.dataset.ts, 10) || Math.floor(Date.now() / 1000), off = parseInt(root.dataset.off, 10) || 0;
+    var now = new Date(ts * 1000);
+    var dist = function (km, digits) { return fmt(imperial ? km / 1.609 : km, t, digits) + (imperial ? '\u00a0mi' : '\u00a0km'); };
+    var where = function (a) { return t.compass[Math.floor((bearing(lat, lon, a.lat, a.lon) + 22.5) / 45) % 8]; };
+    var city = function (name) { if (!name) return ''; name = name.split(',').pop().trim(); return fr ? (CITY_FR[name] || name) : name; };
+
+    q('.fp-k').textContent = t.sky;
+    if (!q('.fp-city').textContent.trim()) q('.fp-city').textContent = t.home;
+    q('.fp-upd-long').textContent = t.updated;
+    q('.fp-upd-short').textContent = t.upd;
+    q('.fp-tag').textContent = t.standby;
+    q('.fp-time').textContent = new Date((ts + off) * 1000).toISOString().substr(11, 5);
+    var color = root.classList.contains('fp--color');
+    var elev = isNaN(lat) ? 30 : sunElevation(lat, lon, now);
+    root.classList.add(elev > 6 ? 'fp--day' : elev > -6 ? 'fp--dusk' : 'fp--night');
+    var wx = null;
+    try { wx = JSON.parse(q('.fp-wx-data').textContent); } catch (e) {}
+    var code = wx && wx.weather_code != null ? wx.weather_code : 0, sky = 'clear';
+    if (code === 2) sky = 'cloudy';
+    else if (code === 3) sky = 'overcast';
+    else if (code === 45 || code === 48) sky = 'fog';
+    else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) sky = 'rain';
+    else if ((code >= 71 && code <= 77) || code === 85 || code === 86) sky = 'snow';
+    else if (code >= 95) sky = 'storm';
+    root.classList.add('fp--wx-' + sky);
+    var wxLabel = t.wx[sky];
+    if (wx && wx.temperature_2m != null) {
+      wxLabel += ' · ' + Math.round(imperial ? wx.temperature_2m * 9 / 5 + 32 : wx.temperature_2m) + (imperial ? ' °F' : ' °C');
+    }
+    if (sky !== 'clear' && sky !== 'cloudy') root.classList.add('fp--grey');
+    if (sky === 'rain' || sky === 'storm') precipitation(root, 'rain', sky === 'storm' ? 1.4 : 1);
+    if (sky === 'snow') precipitation(root, 'snow', 1);
+
+    var raw = null;
+    try { raw = JSON.parse(q('.fp-data').textContent); } catch (e) {}
+    if (isNaN(lat) || isNaN(lon) || !Array.isArray(raw)) {
+      root.classList.add('fp--error');
+      q('.fp-meta').textContent = t.offlineMeta;
+      q('.fp-route').textContent = t.offline;
+      q('.fp-sub').textContent = isNaN(lat) ? t.noCoords : t.noFeed;
+      q('.fp-info').classList.add('fp-err');
+      return fit(q('.fp-route'));
+    }
+
+    var planes = raw.filter(function (a) { return a.lat != null && a.alt_baro !== 'ground' && a.alt_baro != null; })
+      .map(function (a) { a.cs = (a.flight || '').trim(); a.km = distKm(lat, lon, a.lat, a.lon); return a; })
+      .sort(function (a, b) { return a.km - b.km; });
+    var radiusKm = imperial ? radius * 1.609 : radius;
+    var inside = planes.filter(function (a) { return a.km <= radiusKm; });
+    if (prefer && inside.some(isAirliner)) inside = inside.filter(isAirliner);
+    var p = inside[0];
+
+    if (!p) {
+      root.classList.add('fp--empty');
+      q('.fp-meta').textContent = wxLabel + ' · ' + t.radius(fmt(radius, t) + (imperial ? '\u00a0mi' : '\u00a0km'));
+      q('.fp-route').textContent = t.none;
+      var n = planes[0];
+      q('.fp-sub').innerHTML = n ? t.nearest + '<b>' + esc(n.cs || n.r || n.hex) + '</b> · ' + t.at(dist(n.km), where(n)) : t.quiet;
+      return fit(q('.fp-route'));
+    }
+
+    root.classList.add('fp--plane');
+    var track = Math.round(p.track != null ? p.track : (p.true_heading || 0));
+    if (track < 180) q('.fp-flip').setAttribute('transform', 'translate(660 0) scale(-1 1)');
+    q('.fp-needle').setAttribute('transform', 'rotate(' + track + ' 60 60)');
+    q('.fp-reg').textContent = p.r || '';
+    var ft = p.alt_geom || p.alt_baro || 0, rate = p.baro_rate || p.geom_rate || 0;
+    var phase = t.phase[rate > 400 ? 'climb' : rate < -400 ? 'descent' : ft > 20000 ? 'cruise' : 'level'];
+    var alt = imperial ? fmt(ft, t) + '\u00a0ft' : fmt(ft * 0.3048, t) + '\u00a0m';
+    var speed = imperial ? fmt((p.gs || 0) * 1.1508, t) + '\u00a0mph' : fmt((p.gs || 0) * 1.852, t) + '\u00a0km/h';
+    q('.fp-sub').innerHTML = '<b>' + alt + '</b>' + t.alt + ' · <b>' + speed + '</b> · ' + phase + ' · ' + t.at(dist(p.km, 1), where(p));
+    var model = TYPES[p.t] || (p.desc ? titleCase(p.desc) : '') || p.t || t.unknownAc;
+
+    function paint(route, ac) {
+      var airline = (route && route.airline) || {};
+      var icao = airline.icao || (/^[A-Z]{3}\d/.test(p.cs) ? p.cs.substr(0, 3) : '');
+      var name = (airline.name || '').replace(/\s+(AOC|Airlines? Ltd\.?)$/, '') || (ac && ac.registered_owner) || '';
+      var iata = route && route.callsign_iata, m = iata && iata.match(/^([A-Z0-9]{2})(\d+)$/);
+      var flight = m ? m[1] + ('00' + m[2]).slice(-Math.max(3, m[2].length)) : (iata || p.cs || p.r || p.hex);
+      var o = route && route.origin, d = route && route.destination;
+      if (o && d) {
+        q('.fp-meta').textContent = [name || icao || t.private, flight, model].join(' · ');
+        q('.fp-route').innerHTML = esc(city(o.municipality) || o.iata_code) + '<span class="arrow">→</span>' + esc(city(d.municipality) || d.iata_code);
+      } else {
+        // Sans itinéraire (vol privé, d'affaires, militaire…) : l'opérateur ou le modèle en titre
+        q('.fp-meta').textContent = [flight, name ? model : null, t.noRoute].filter(Boolean).join(' · ');
+        q('.fp-route').textContent = name || model;
+      }
+      if (color) {
+        var lv = LIVERIES[icao] || ['#ffffff', '#8a8f99', '#c9ccd2', '#8a8f99'];
+        ['--tail', '--s1', '--s2', '--body'].forEach(function (k, i) { root.style.setProperty(k, lv[i]); });
+      }
+      fit(q('.fp-route'));
+    }
+    paint(null, null);
+    var reqs = [p.cs ? getJSON('https://api.adsbdb.com/v0/callsign/' + encodeURIComponent(p.cs), 4000) : Promise.resolve(null),
+                getJSON('https://api.adsbdb.com/v0/aircraft/' + p.hex, 4000)];
+    var airlinerCs = /^[A-Z]{3}\d/.test(p.cs);
+    Promise.all(reqs).then(function (r) {
+      var route = r[0] && r[0].response && r[0].response.flightroute, ac = r[1] && r[1].response && r[1].response.aircraft;
+      // Secours : base de routes VRS (adsb.lol), numéro sans zéros de tête (AMX006 → AMX6)
+      var cs = p.cs.replace(/^([A-Z]{3})0*(\d)/, '$1$2');
+      var routeP = route || !airlinerCs ? Promise.resolve(route) :
+        getJSON('https://vrs-standing-data.adsb.lol/routes/' + cs.substr(0, 2) + '/' + cs + '.json', 3000).then(function (v) {
+          var ap = v && v._airports;
+          if (!ap || ap.length < 2) return null;
+          var leg = function (a) { return { municipality: a.location, iata_code: a.iata || a.icao }; };
+          return { airline: { icao: v.airline_code }, origin: leg(ap[0]), destination: leg(ap[ap.length - 1]) };
+        });
+      return routeP.then(function (rt) {
+        var icao = (rt && rt.airline && rt.airline.icao) || (airlinerCs ? p.cs.substr(0, 3) : '');
+        if ((rt && rt.airline && rt.airline.name) || !icao) return paint(rt, ac);
+        var num = p.cs.match(/^[A-Z]{3}(\d+)$/), known = AIRLINES[icao];
+        if (known) {
+          rt = rt || {};
+          rt.airline = { icao: icao, name: known[0] };
+          if (rt.origin && !rt.callsign_iata && known[1] && num) rt.callsign_iata = known[1] + num[1].replace(/^0+/, '');
+          return paint(rt, ac);
+        }
+        // Nom de la compagnie depuis son code OACI, plutôt que le propriétaire de l'appareil (souvent un loueur)
+        return getJSON('https://api.adsbdb.com/v0/airline/' + icao, 3000).then(function (a) {
+          var al = a && a.response && a.response[0];
+          if (al) {
+            rt = rt || {};
+            rt.airline = { icao: icao, name: al.name };
+            if (rt.origin && !rt.callsign_iata && al.iata && num) rt.callsign_iata = al.iata + num[1].replace(/^0+/, '');
+          }
+          paint(rt, ac);
+        });
+      });
+    });
+  }
+
+  // Gouttes / flocons dessinés sous chaque nuage, avec un hasard reproductible
+  function precipitation(root, kind, density) {
+    var NS = 'http://www.w3.org/2000/svg', g = root.querySelector('.fp-' + kind), seed = 7;
+    var rnd = function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    var eink = root.classList.contains('fp--eink');
+    root.querySelectorAll('.fp-sky use').forEach(function (u) {
+      var m = /translate\(([-\d.]+) ([-\d.]+)\) scale\(([\d.]+)\)/.exec(u.getAttribute('transform'));
+      if (!m || getComputedStyle(u.parentNode).display === 'none') return;
+      var x0 = +m[1], y0 = +m[2], k = +m[3], bottom = y0 + 60 * k;
+      var n = Math.round((kind === 'rain' ? 11 : 7) * k * density);
+      for (var i = 0; i < n; i++) {
+        var x = x0 + (16 + rnd() * 108) * k, y = bottom + 8 + rnd() * (90 + 110 * k);
+        if (y > 530) continue;
+        var el;
+        if (kind === 'rain') {
+          var len = 12 + rnd() * 20;
+          el = document.createElementNS(NS, 'line');
+          el.setAttribute('x1', x); el.setAttribute('y1', y);
+          el.setAttribute('x2', x - len * 0.18); el.setAttribute('y2', y + len);
+          el.setAttribute('stroke-width', eink ? 3.5 : 2.5 + rnd());
+        } else {
+          el = document.createElementNS(NS, 'circle');
+          el.setAttribute('cx', x); el.setAttribute('cy', y); el.setAttribute('r', 3 + rnd() * 3.5);
+        }
+        g.appendChild(el);
+      }
+    });
+  }
+
+  function boot() { document.querySelectorAll('.fp:not([data-done])').forEach(render); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+    document.querySelectorAll('.fp-route').forEach(fit);
+  });
+})();
+</script>

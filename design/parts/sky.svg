@@ -1,0 +1,44 @@
+    <svg viewBox="0 0 1280 540" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="fp-hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="9" height="9" fill="#fff"/><rect width="3" height="9" fill="#000"/>
+        </pattern>
+        <pattern id="fp-lines" width="12" height="15" patternUnits="userSpaceOnUse">
+          <rect width="12" height="15" fill="#fff"/><rect width="12" height="2" fill="#000"/>
+        </pattern>
+        <pattern id="fp-dots" width="16" height="16" patternUnits="userSpaceOnUse">
+          <circle cx="4" cy="4" r="1.6" fill="#000"/><circle cx="12" cy="12" r="1.6" fill="#000"/>
+        </pattern>
+        <pattern id="fp-fog-p" width="300" height="70" patternUnits="userSpaceOnUse">
+          <path d="M10 14 H150 M170 50 H280" style="stroke:var(--fog)" stroke-width="4" stroke-linecap="round" stroke-dasharray="40 14"/>
+        </pattern>
+        <g id="fp-cloud"><path d="M30 64 a24 24 0 0 1 4-47 a34 34 0 0 1 62-6 a26 26 0 0 1 38 26 a16 16 0 0 1 2 27 Z"/></g>
+      </defs>
+      <rect class="wx fp-dots" x="0" y="0" width="1280" height="540" fill="url(#fp-dots)" opacity=".9"/>
+      <rect class="wx fp-glow" x="0" y="330" width="1280" height="210" style="fill:var(--glow)"/>
+      <g class="wx fp-sun" style="fill:var(--sun);stroke:var(--sun-stroke);stroke-width:4"><circle cx="800" cy="130" r="74"/></g>
+      <g class="wx fp-moon"><circle cx="800" cy="130" r="66" style="fill:var(--sun)"/><circle cx="826" cy="111" r="59" style="fill:var(--sky)"/></g>
+      <g class="wx fp-stars" style="fill:var(--star)">
+        <circle cx="140" cy="130" r="2"/><circle cx="310" cy="210" r="1.6"/><circle cx="420" cy="110" r="2.2"/>
+        <circle cx="980" cy="150" r="1.8"/><circle cx="1130" cy="250" r="2"/><circle cx="860" cy="90" r="1.5"/>
+        <circle cx="230" cy="350" r="1.5"/><circle cx="1060" cy="390" r="1.7"/><circle cx="560" cy="80" r="1.4"/>
+      </g>
+      <g class="wx fp-rain" style="stroke:var(--rain)" stroke-linecap="round"></g>
+      <g class="wx fp-snow" style="fill:var(--snow);stroke:var(--snow-stroke)" stroke-width="2"></g>
+      <g style="fill:var(--cloud);stroke:var(--cloud-stroke);stroke-width:3">
+        <g class="wx fp-clouds-more">
+          <use href="#fp-cloud" transform="translate(-30 105) scale(1.5)"/>
+          <use href="#fp-cloud" transform="translate(330 90) scale(1.6)"/>
+          <use href="#fp-cloud" transform="translate(700 100) scale(1.4)"/>
+          <use href="#fp-cloud" transform="translate(1040 85) scale(1.5)"/>
+          <use href="#fp-cloud" transform="translate(520 330) scale(1.3)"/>
+        </g>
+        <use href="#fp-cloud" transform="translate(150 250) scale(1.2)"/>
+        <use href="#fp-cloud" transform="translate(930 190) scale(.9)"/>
+        <use href="#fp-cloud" transform="translate(1010 400) scale(1.1)"/>
+        <use href="#fp-cloud" transform="translate(80 420) scale(.7)"/>
+      </g>
+      <path class="wx fp-bolt" d="M372 150 L322 262 L356 262 L330 360 L424 228 L386 228 L414 150 Z"
+            style="fill:var(--bolt);stroke:var(--cloud-stroke)" stroke-width="3" stroke-linejoin="round"/>
+      <rect class="wx fp-fog" x="0" y="190" width="1280" height="350" fill="url(#fp-fog-p)"/>
+    </svg>

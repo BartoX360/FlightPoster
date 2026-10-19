@@ -1,0 +1,55 @@
+@@FONTS
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=block" rel="stylesheet">
+@@CSS
+  .fp { position: absolute; inset: 0; overflow: hidden; container-type: size; font-family: 'Oswald', 'Arial Narrow', sans-serif;
+        --board: #16181d; --frame: #d9dce1; --amber: #ffcc44; --label: #8a8f99; --line: #2e323a; background: var(--board); color: var(--amber); }
+  .fp.fp--eink { --board: #000000; --frame: #ffffff; --amber: #ffffff; --label: #ffffff; --line: #ffffff; }
+  .win { position: absolute; left: 4cqw; top: 6cqh; bottom: 6cqh; width: 36cqw; border-radius: 18cqw / 22cqh;
+         border: 1.6cqw solid var(--frame); overflow: hidden; box-sizing: border-box; }
+  .fp--eink .win { box-shadow: inset 0 0 0 4px #000; }
+  .win .fp-sky { position: absolute; inset: 0; }
+  .win .art { position: absolute; left: 3%; right: 3%; top: 30%; height: 40%; }
+  .win .art svg { width: 100%; height: 100%; }
+  .fp--east .flip { transform: translateX(660px) scaleX(-1); }
+  .brd { position: absolute; left: 45cqw; right: 4cqw; top: 6cqh; bottom: 6cqh; display: flex; flex-direction: column; }
+  .brd-head { display: flex; justify-content: space-between; font-size: max(14px, 1.9cqw); letter-spacing: .14em; text-transform: uppercase;
+              color: var(--label); border-bottom: max(2px, .25cqw) solid var(--line); padding-bottom: 1.4cqh; }
+  .brd-dest { margin: 3cqh 0 1cqh; }
+  .brd-k { font-size: max(13px, 1.7cqw); letter-spacing: .18em; text-transform: uppercase; color: var(--label); }
+  .brd-big { font-weight: 700; font-size: 7.4cqw; line-height: 1.05; text-transform: uppercase; letter-spacing: .02em; }
+  .brd-rows { margin-top: auto; }
+  .brd-row { display: flex; justify-content: space-between; align-items: baseline; gap: 2cqw; border-top: max(1px, .15cqw) solid var(--line);
+             padding: 1.15cqh 0; font-size: max(16px, 2.3cqw); }
+  .brd-row .brd-k { flex: 0 0 auto; }
+  .brd-row b { font-weight: 500; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fp--climb .up::after { content: ' ↗'; } .fp--descent .up::after { content: ' ↘'; }
+  .brd-msg { font-size: max(16px, 2.4cqw); color: var(--label); margin-top: 1cqh; }
+@@MARKUP
+  <div class="win">
+    <div class="fp-sky">
+<!--SKY-->
+    </div>
+    <div class="art" data-show="plane"><svg viewBox="0 -40 660 250" preserveAspectRatio="xMidYMid meet"><g class="flip">
+<!--PLANE_SIDE-->
+    </g></svg></div>
+  </div>
+  <div class="brd">
+    <div class="brd-head"><span><span data-l="overhead"></span> · <span data-f="city">{{ cf.city }}</span></span><span data-f="time"></span></div>
+    <div class="brd-dest" data-show="plane">
+      <div class="brd-k" data-show="route"><span data-l="to"></span></div>
+      <div class="brd-k" data-show="noroute" data-f="noRoute"></div>
+      <div class="brd-big fp-fit" data-f="title"></div>
+    </div>
+    <div class="brd-dest" data-show="empty"><div class="brd-k" data-f="wxFull"></div><div class="brd-big fp-fit" data-f="none"></div>
+      <div class="brd-msg" data-f="nearestText"></div></div>
+    <div class="brd-dest" data-show="error"><div class="brd-k" data-f="errMeta"></div><div class="brd-big" data-f="errTitle"></div>
+      <div class="brd-msg" data-f="errMsg"></div></div>
+    <div class="brd-rows" data-show="plane">
+      <div class="brd-row" data-show="route"><span class="brd-k" data-l="from"></span><b data-f="from"></b></div>
+      <div class="brd-row"><span class="brd-k" data-l="flight"></span><b><span data-f="flight"></span> · <span data-f="airline"></span></b></div>
+      <div class="brd-row"><span class="brd-k" data-l="aircraft"></span><b data-f="model"></b></div>
+      <div class="brd-row"><span class="brd-k" data-l="altitude"></span><b class="up" data-f="alt"></b></div>
+      <div class="brd-row"><span class="brd-k" data-l="speed"></span><b data-f="speed"></b></div>
+      <div class="brd-row"><span class="brd-k" data-l="weather"></span><b data-f="wxFull"></b></div>
+    </div>
+  </div>

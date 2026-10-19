@@ -1,0 +1,68 @@
+@@FONTS
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=block" rel="stylesheet">
+@@CSS
+  .fp { position: absolute; inset: 0; overflow: hidden; container-type: size; font-family: 'Space Grotesk', system-ui, sans-serif;
+        --paper: #eef1ef; --ink: #14201c; --muted: #55625d; --accent: #dd2233; --d: min(86cqh, 52cqw);
+        background: var(--paper); color: var(--ink); }
+  .fp.fp--eink { --paper: #ffffff; --ink: #000000; --muted: #000000; --accent: #000000; font-weight: 500; }
+  .rd { position: absolute; left: 4cqw; top: 50%; width: var(--d); height: var(--d); transform: translateY(-50%); }
+  .rd .fp-sky { position: absolute; inset: 0; border-radius: 50%; }
+  .fp--eink .rd .fp-sky { box-shadow: 0 0 0 3px #000; }
+  .rd > svg.rings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .rings circle, .rings line { fill: none; stroke: var(--sky-ink); stroke-width: 2; }
+  .rings .dash { stroke-dasharray: 6 8; }
+  .rings text { fill: var(--sky-ink); font: 600 22px 'Space Grotesk', sans-serif; }
+  .rings .north { fill: var(--ink); font-size: 30px; }
+  .rings .lbl { paint-order: stroke; stroke: var(--sky); stroke-width: 8px; }
+  .home { position: absolute; left: 50%; top: 50%; width: 3.4%; height: 3.4%; transform: translate(-50%, -50%);
+          background: var(--accent); border: 3px solid var(--paper); border-radius: 50%; }
+  .jet { position: absolute; left: calc(50% + var(--px, 0) * 46%); top: calc(50% + var(--py, 0) * 46%); width: 15%; height: 15%;
+         transform: translate(-50%, -50%) rotate(var(--track, 0deg)); }
+  .jet svg { width: 100%; height: 100%; overflow: visible; }
+  .jet path { fill: #ffffff; stroke: #111111; stroke-width: 4; stroke-linejoin: round; }
+  .fp--empty .jet { width: 9%; height: 9%; }
+  .fp--empty .jet path { fill: none; stroke: var(--sky-ink); stroke-dasharray: 5 5; }
+  .fp--empty:not(.fp--has-nearest) .jet { display: none; }
+  .tx { position: absolute; left: calc(8cqw + var(--d)); right: 4cqw; top: 7cqh; bottom: 7cqh; display: flex; flex-direction: column; }
+  .tx-head { font-size: max(14px, 1.8cqw); color: var(--muted); display: flex; gap: 1.2em; font-weight: 500; }
+  .tx-head b { color: var(--ink); font-weight: 700; }
+  .tx-mid { margin: auto 0; }
+  .tx-k { font-size: max(14px, 1.9cqw); color: var(--muted); font-weight: 500; }
+  .tx-big { font-weight: 700; font-size: 6.4cqw; line-height: 1; letter-spacing: -.02em; margin: .6cqh 0 1.2cqh; }
+  .tx-line { font-size: max(16px, 2.3cqw); font-weight: 500; }
+  .tx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2cqh 2cqw; border-top: max(2px, .25cqw) solid var(--ink); padding-top: 2cqh; }
+  .tx-grid .tx-k { font-size: max(12px, 1.5cqw); }
+  .tx-v { font-size: max(16px, 2.5cqw); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip { display: inline-block; border: max(2px, .2cqw) solid var(--ink); border-radius: 99px; padding: .2em .8em; }
+@@MARKUP
+  <div class="rd">
+    <div class="fp-sky">
+<!--SKY-->
+    </div>
+    <svg class="rings" viewBox="0 0 400 400">
+      <circle cx="200" cy="200" r="198"/><circle class="dash" cx="200" cy="200" r="92"/>
+      <line class="dash" x1="200" y1="10" x2="200" y2="390"/><line class="dash" x1="10" y1="200" x2="390" y2="200"/>
+      <text class="north" x="200" y="-12" text-anchor="middle">N</text>
+      <text class="lbl" x="346" y="352" text-anchor="middle" data-f="radius"></text>
+    </svg>
+    <div class="home"></div>
+    <div class="jet"><svg viewBox="0 0 100 100"><path d="M50 6 C54 6 56 12 56 20 L56 40 L92 58 L92 64 L56 56 L56 78 L68 88 L68 93 L50 89 L32 93 L32 88 L44 78 L44 56 L8 64 L8 58 L44 40 L44 20 C44 12 46 6 50 6 Z"/></svg></div>
+  </div>
+  <div class="tx">
+    <div class="tx-head"><span><b data-f="city">{{ cf.city }}</b></span><span data-f="time"></span><span class="chip" data-f="wxFull"></span></div>
+    <div class="tx-mid" data-show="plane">
+      <div class="tx-k" data-show="route"><span data-l="from"></span> <span data-f="from"></span> →</div>
+      <div class="tx-k" data-show="noroute" data-f="noRoute"></div>
+      <div class="tx-big fp-fit" data-f="title"></div>
+      <div class="tx-line"><span data-f="airline"></span> · <span data-f="flight"></span></div>
+    </div>
+    <div class="tx-mid" data-show="empty"><div class="tx-big fp-fit" data-f="none"></div><div class="tx-line" data-f="nearestText"></div></div>
+    <div class="tx-mid" data-show="error"><div class="tx-k" data-f="errMeta"></div><div class="tx-big" data-f="errTitle"></div>
+      <div class="tx-line" data-f="errMsg"></div></div>
+    <div class="tx-grid" data-show="plane">
+      <div><div class="tx-k" data-l="altitude"></div><div class="tx-v" data-f="alt"></div></div>
+      <div><div class="tx-k" data-l="speed"></div><div class="tx-v" data-f="speed"></div></div>
+      <div><div class="tx-k" data-l="distance"></div><div class="tx-v"><span data-f="dist"></span> <span data-f="dir"></span></div></div>
+      <div><div class="tx-k" data-l="aircraft"></div><div class="tx-v" data-f="model"></div></div>
+    </div>
+  </div>

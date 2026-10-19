@@ -1,0 +1,69 @@
+@@FONTS
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;800&family=DM+Serif+Display&display=block" rel="stylesheet">
+@@CSS
+  .fp { position: absolute; inset: 0; overflow: hidden; container-type: size; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+        --paper: #fbf8f2; --ink: #1b2433; --muted: #5b6475; --rule: #c9ccd2; --accent: var(--body); color: var(--ink); }
+  .fp.fp--eink { --paper: #ffffff; --ink: #000000; --muted: #000000; --rule: #000000; --accent: #000000; font-weight: 600; }
+  .fp-sky { position: absolute; inset: 0; }
+  .fp-head { position: absolute; left: 6cqw; right: 6cqw; top: 3.4cqh; display: flex; justify-content: space-between;
+             font-size: max(14px, 2.1cqw); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--sky-ink); }
+  .fp--eink.fp--night .fp-head { color: #fff; }
+  .tk { position: absolute; left: 6cqw; right: 6cqw; top: 34cqh; bottom: 6cqh; background: var(--paper);
+        border-radius: 2.2cqw; display: flex; overflow: hidden; }
+  .fp--eink .tk { border: 3px solid #000; }
+  .tk-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  .tk-band { background: var(--accent); color: #fff; display: flex; justify-content: space-between; align-items: center;
+             padding: 1.6cqh 3cqw; font-size: max(15px, 2.3cqw); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .tk-band span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 2cqw; }
+  .tk-body { flex: 1 1 auto; padding: 2.2cqh 3cqw 2cqh; display: flex; flex-direction: column; justify-content: space-between; }
+  .tk-route { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2cqw; }
+  .tk-code { font-weight: 800; font-size: 10cqw; line-height: .9; letter-spacing: .01em; }
+  .tk-city { font-family: 'DM Serif Display', Georgia, serif; font-size: max(15px, 2.6cqw); margin-top: .6cqh; color: var(--muted); font-weight: 400; }
+  .tk-to { text-align: right; }
+  .tk-path { position: relative; height: 4cqw; }
+  .tk-path::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: max(2px, .3cqw) dashed var(--ink); }
+  .tk-path svg { position: absolute; left: 50%; top: 50%; width: 4.4cqw; height: 4.4cqw; transform: translate(-50%, -50%) rotate(90deg);
+                 background: var(--paper); padding: 0 .8cqw; box-sizing: content-box; }
+  .tk-title { font-weight: 800; font-size: 9cqw; line-height: 1; text-transform: uppercase; }
+  .tk-cells { display: grid; grid-template-columns: repeat(4, 1fr); border-top: max(2px, .25cqw) solid var(--ink); padding-top: 1.6cqh; gap: 1.5cqw; }
+  .tk-l { font-size: max(12px, 1.5cqw); color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 600; }
+  .tk-v { font-size: max(16px, 2.6cqw); font-weight: 800; white-space: nowrap; }
+  .tk-stub { flex: 0 0 25%; border-left: max(2px, .3cqw) dashed var(--rule); padding: 2.4cqh 2.4cqw; display: flex; flex-direction: column;
+             justify-content: space-between; }
+  .tk-stub .tk-v { white-space: normal; line-height: 1.1; }
+  .tk-big { font-weight: 800; font-size: 8cqw; line-height: 1; text-transform: uppercase; }
+  .tk-msg { font-family: 'DM Serif Display', Georgia, serif; font-size: max(16px, 2.6cqw); color: var(--muted); font-weight: 400; }
+@@MARKUP
+  <div class="fp-sky">
+<!--SKY-->
+  </div>
+  <div class="fp-head"><span><span data-l="overhead"></span> · <span data-f="city">{{ cf.city }}</span></span><span><span data-l="upd"></span> <span data-f="time"></span></span></div>
+  <div class="tk">
+    <div class="tk-main">
+      <div class="tk-band"><span data-show="plane" data-f="airline"></span><span data-show="plane" data-f="flight"></span>
+        <span data-show="empty error" data-f="wxFull"></span><span data-show="empty" data-f="radius"></span></div>
+      <div class="tk-body">
+        <div class="tk-route" data-show="plane route">
+          <div><div class="tk-code" data-f="fromCode"></div><div class="tk-city fp-fit" data-f="from"></div></div>
+          <div class="tk-path"><svg viewBox="0 0 100 100"><path d="M50 6 C54 6 56 12 56 20 L56 40 L92 58 L92 64 L56 56 L56 78 L68 88 L68 93 L50 89 L32 93 L32 88 L44 78 L44 56 L8 64 L8 58 L44 40 L44 20 C44 12 46 6 50 6 Z" style="fill:var(--ink)"/></svg></div>
+          <div class="tk-to"><div class="tk-code" data-f="toCode"></div><div class="tk-city fp-fit" data-f="to"></div></div>
+        </div>
+        <div data-show="plane noroute"><div class="tk-title fp-fit" data-f="title"></div><div class="tk-city" data-f="noRoute"></div></div>
+        <div data-show="empty"><div class="tk-big fp-fit" data-f="none"></div><div class="tk-msg" data-f="nearestText"></div></div>
+        <div data-show="error"><div class="tk-big" data-f="errTitle"></div><div class="tk-msg" data-f="errMsg"></div></div>
+        <div class="tk-cells" data-show="plane">
+          <div><div class="tk-l" data-l="altitude"></div><div class="tk-v" data-f="alt"></div></div>
+          <div><div class="tk-l" data-l="speed"></div><div class="tk-v" data-f="speed"></div></div>
+          <div><div class="tk-l" data-l="status"></div><div class="tk-v" data-f="phase"></div></div>
+          <div><div class="tk-l" data-l="distance"></div><div class="tk-v"><span data-f="dist"></span> <span data-f="dir"></span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tk-stub">
+      <div data-show="plane"><div class="tk-l" data-l="aircraft"></div><div class="tk-v" data-f="model"></div></div>
+      <div data-show="plane"><div class="tk-l" data-l="reg"></div><div class="tk-v" data-f="reg"></div></div>
+      <div data-show="plane"><div class="tk-l" data-l="weather"></div><div class="tk-v" data-f="wxFull"></div></div>
+      <div data-show="empty error"><div class="tk-l" data-l="weather"></div><div class="tk-v" data-f="wx"></div></div>
+      <div data-show="empty error"><div class="tk-big" data-f="temp"></div></div>
+    </div>
+  </div>
