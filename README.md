@@ -42,6 +42,9 @@ No server to install. Everything comes from free, community-run data sources:
 
 ### Installation
 
+> [!NOTE]
+> This plugin is built and tested on [LaraPaper](https://github.com/usetrmnl/larapaper) only. It should work on usetrmnl.com and other TRMNL servers, but it has not been tested there: feedback is welcome in the issues.
+
 **TRMNL (usetrmnl.com)**: create a *Private Plugin* with the *Polling* strategy, then copy:
 - both URLs from `polling_url` in `recipe/src/settings.yml` (one per line) into *Polling URL*;
 - the `custom_fields` from `recipe/src/settings.yml` into *Custom fields* (YAML);
@@ -104,6 +107,9 @@ Aucun serveur à installer. Toutes les données viennent de services gratuits et
 | E-ink · brouillard, aucun avion | Demi vertical |
 
 ### Installation
+
+> [!NOTE]
+> Ce plugin est développé et testé uniquement sur [LaraPaper](https://github.com/usetrmnl/larapaper). Il devrait fonctionner sur usetrmnl.com et les autres serveurs TRMNL, mais il n'y a pas été testé : les retours sont les bienvenus dans les issues.
 
 **TRMNL (usetrmnl.com)** : créer un *Private Plugin* en stratégie *Polling*, puis recopier :
 - les deux URL de `polling_url` dans `recipe/src/settings.yml` (une par ligne) dans *Polling URL* ;
