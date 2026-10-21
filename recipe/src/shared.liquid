@@ -57,8 +57,9 @@
   .fp-meta { font-size: var(--f-meta); letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
              white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fp-route { font-family: 'Archivo', 'Arial Black', sans-serif; font-weight: 900; font-size: var(--f-route);
-              line-height: 1.05; text-transform: uppercase; margin: .18em 0 .14em; white-space: nowrap; overflow: hidden; }
+              line-height: 1.05; text-transform: uppercase; margin: 0 0 .16em; white-space: nowrap; overflow: hidden; }
   .fp-route .arrow { font-weight: 400; margin: 0 .15em; }
+  .fp-meta { margin-bottom: .55em; }
   .fp-sub { font-size: var(--f-sub); color: var(--muted); letter-spacing: .03em; }
   .fp-sub b { color: var(--ink); font-weight: 500; }
   .fp-compass { flex: 0 0 auto; text-align: center; font-size: var(--f-top); letter-spacing: .2em; color: var(--muted); }
@@ -185,8 +186,8 @@
   </div>
   <div class="fp-info">
     <div class="fp-text">
-      <div class="fp-meta"></div>
       <div class="fp-route"></div>
+      <div class="fp-meta"></div>
       <div class="fp-sub"></div>
     </div>
     <div class="fp-compass" data-show="plane">
@@ -267,7 +268,8 @@
     BCY: ['CityJet', 'WX'], TOM: ['TUI Airways', 'BY'], DAL: ['Delta', 'DL'], UAL: ['United', 'UA'], AAL: ['American', 'AA'],
     ACA: ['Air Canada', 'AC'], ETD: ['Etihad', 'EY'], CFG: ['Condor', 'DE'], BEL: ['Brussels Airlines', 'SN'],
     AEE: ['Aegean', 'A3'], LOT: ['LOT', 'LO'], FIN: ['Finnair', 'AY'], AMX: ['Aeroméxico', 'AM'], AEA: ['Air Europa', 'UX'],
-    FDX: ['FedEx', 'FX'], UPS: ['UPS', '5X'], DHK: ['DHL', 'D0'], NJE: ['NetJets Europe', '1I']
+    FDX: ['FedEx', 'FX'], UPS: ['UPS', '5X'], DHK: ['DHL', 'D0'], NJE: ['NetJets Europe', '1I'], OCN: ['Discover Airlines', '4Y'], CLH: ['Lufthansa CityLine', 'CL'],
+    DLA: ['Air Dolomiti', 'EN'], EDW: ['Edelweiss', 'WK'], GWI: ['Eurowings', '4U'], SXS: ['SunExpress', 'XQ']
   };
 
   var I18N = {
@@ -419,9 +421,12 @@
     function paint(route, ac) {
       var airline = (route && route.airline) || {};
       var icao = airline.icao || (/^[A-Z]{3}\d/.test(p.cs) ? p.cs.substr(0, 3) : '');
-      var name = (airline.name || '').replace(/\s+(AOC|Airlines? Ltd\.?)$/, '') || (ac && ac.registered_owner) || '';
+      // La liste intégrée passe avant adsbdb, dont certains codes compagnie sont erronés
+      var known = AIRLINES[icao], num = p.cs.match(/^[A-Z]{3}0*(\d+)$/);
+      var name = (known && known[0]) || (airline.name || '').replace(/\s+(AOC|Airlines? Ltd\.?)$/, '') || (ac && ac.registered_owner) || '';
       var iata = route && route.callsign_iata, m = iata && iata.match(/^([A-Z0-9]{2})(\d+)$/);
-      var flight = m ? m[1] + ('00' + m[2]).slice(-Math.max(3, m[2].length)) : (iata || p.cs || p.r || p.hex);
+      if (!m || !/[A-Z]/.test(m[1])) m = known && known[1] && num ? [null, known[1], num[1]] : null;
+      var flight = m ? m[1] + ('00' + m[2]).slice(-Math.max(3, m[2].length)) : (p.cs || p.r || p.hex);
       var o = route && route.origin, d = route && route.destination;
       if (o && d) {
         q('.fp-meta').textContent = [name || icao || t.private, flight, model].join(' · ');

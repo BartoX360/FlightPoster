@@ -10,6 +10,8 @@
 
 *Look up: FlightPoster tells you which plane is flying over your home.*
 
+> Design heavily inspired by AvioFrame's superb work, rebuilt from scratch for the TRMNL ecosystem.
+
 A TRMNL plugin that shows the plane flying over your home, with the real sky behind it: sun, dusk or night, and the current weather (clouds, rain, snow, fog, thunderstorms). It is the first plugin of the Poster suite, with [WeatherPoster](https://github.com/BartoX360/WeatherPoster), [GamePoster](https://github.com/BartoX360/GamePoster), [MoviePoster](https://github.com/BartoX360/MoviePoster), [ShowPoster](https://github.com/BartoX360/ShowPoster) and [BookPoster](https://github.com/BartoX360/BookPoster).
 
 No server to install. Everything comes from free, community-run data sources:
@@ -77,6 +79,8 @@ The `recipe/src/` folder follows the [trmnlp](https://github.com/usetrmnl/trmnlp
 ## Français
 
 *Levez les yeux : FlightPoster vous dit quel avion survole votre maison.*
+
+> Design grandement inspiré par le superbe travail d'AvioFrame, recodé de zéro pour l'écosystème TRMNL.
 
 Un plugin TRMNL qui affiche l'avion qui passe au-dessus de chez vous, avec le vrai ciel derrière : soleil, crépuscule ou nuit, et la météo du moment (nuages, pluie, neige, brouillard, orage). C'est le premier plugin de la suite Poster, avec [WeatherPoster](https://github.com/BartoX360/WeatherPoster), [GamePoster](https://github.com/BartoX360/GamePoster), [MoviePoster](https://github.com/BartoX360/MoviePoster), [ShowPoster](https://github.com/BartoX360/ShowPoster) et [BookPoster](https://github.com/BartoX360/BookPoster).
 
