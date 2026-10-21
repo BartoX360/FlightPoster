@@ -14,7 +14,7 @@ custom_fields:
 - keyname: about
   field_type: author_bio
   name: FlightPoster
-  description: "Shows the plane flying over your home, live, with the real weather in the sky. Data: adsb.fi, adsbdb, VRS standing data (adsb.lol) and Open-Meteo. / Affiche l'avion qui passe au-dessus de chez vous, avec la vraie météo. v1.0.0"
+  description: "Shows the plane flying over your home, live, with the real weather in the sky. Data: adsb.fi, adsbdb, VRS standing data (adsb.lol) and Open-Meteo. / Affiche l'avion qui passe au-dessus de chez vous, avec la vraie météo. v1.1.0"
   github_url: https://github.com/BartoX360/FlightPoster
 - keyname: lat
   field_type: string
