@@ -10,7 +10,7 @@
 
 *Look up: FlightPoster tells you which plane is flying over your home.*
 
-A TRMNL plugin that shows the plane flying over your home, with the real sky behind it: sun, dusk or night, and the current weather (clouds, rain, snow, fog, thunderstorms).
+A TRMNL plugin that shows the plane flying over your home, with the real sky behind it: sun, dusk or night, and the current weather (clouds, rain, snow, fog, thunderstorms). It is the first plugin of the Poster suite, with [WeatherPoster](https://github.com/BartoX360/WeatherPoster), [GamePoster](https://github.com/BartoX360/GamePoster), [MoviePoster](https://github.com/BartoX360/MoviePoster), [ShowPoster](https://github.com/BartoX360/ShowPoster) and [BookPoster](https://github.com/BartoX360/BookPoster).
 
 No server to install. Everything comes from free, community-run data sources:
 
@@ -49,7 +49,7 @@ No server to install. Everything comes from free, community-run data sources:
 
 The `recipe/src/` folder follows the [trmnlp](https://github.com/usetrmnl/trmnlp) layout.
 
-**LaraPaper / BYOS**: *Plugins → Import recipe*, pick [`recipe/flightposter.zip`](recipe/flightposter.zip), then fill in your settings.
+**LaraPaper / BYOS**: *Plugins → Import recipe*, pick `flightposter-x.y.z.zip` from the [latest release](https://github.com/BartoX360/FlightPoster/releases/latest) (or zip the contents of `recipe/src/`), then fill in your settings.
 
 ### Settings
 
@@ -75,7 +75,7 @@ The `recipe/src/` folder follows the [trmnlp](https://github.com/usetrmnl/trmnlp
 
 *Levez les yeux : FlightPoster vous dit quel avion survole votre maison.*
 
-Un plugin TRMNL qui affiche l'avion qui passe au-dessus de chez vous, avec le vrai ciel derrière : soleil, crépuscule ou nuit, et la météo du moment (nuages, pluie, neige, brouillard, orage).
+Un plugin TRMNL qui affiche l'avion qui passe au-dessus de chez vous, avec le vrai ciel derrière : soleil, crépuscule ou nuit, et la météo du moment (nuages, pluie, neige, brouillard, orage). C'est le premier plugin de la suite Poster, avec [WeatherPoster](https://github.com/BartoX360/WeatherPoster), [GamePoster](https://github.com/BartoX360/GamePoster), [MoviePoster](https://github.com/BartoX360/MoviePoster), [ShowPoster](https://github.com/BartoX360/ShowPoster) et [BookPoster](https://github.com/BartoX360/BookPoster).
 
 Aucun serveur à installer. Toutes les données viennent de services gratuits et communautaires :
 
@@ -112,7 +112,7 @@ Aucun serveur à installer. Toutes les données viennent de services gratuits et
 
 Le dossier `recipe/src/` suit l'organisation de [trmnlp](https://github.com/usetrmnl/trmnlp).
 
-**LaraPaper / BYOS** : *Plugins → Import recipe*, choisir [`recipe/flightposter.zip`](recipe/flightposter.zip), puis renseigner les réglages.
+**LaraPaper / BYOS** : *Plugins → Import recipe*, choisir `flightposter-x.y.z.zip` dans la [dernière release](https://github.com/BartoX360/FlightPoster/releases/latest) (ou zippez le contenu de `recipe/src/`), puis renseigner les réglages.
 
 ### Réglages
 
@@ -142,11 +142,17 @@ Le dossier `recipe/src/` suit l'organisation de [trmnlp](https://github.com/uset
 |---|---|
 | [`recipe/src/`](recipe/src/) | Code du plugin (`settings.yml`, `shared.liquid`, un fichier par format) |
 | [`recipe/screenshots/`](recipe/screenshots/) | Captures du README |
-| [`design/`](design/) | Pistes de redesign explorées (Billet, Hublot, Radar), non retenues |
-| `recipe_render.sh <dossier>` | Zippe la recette, l'importe dans LaraPaper en « FlightPoster (test) » et rapatrie les rendus de test |
-| `recipe_test.php` | Cas de test rendus par `recipe_render.sh` (formats, styles, météo, langues) |
-| `migrate.php` | Applique la recette testée au plugin FlightPoster en place |
-| `update_shared.php` | Met à jour uniquement le markup partagé du plugin en place |
-| `palette_apply.php` + `palette.json` | Palette 256 couleurs pour les écrans couleur sous LaraPaper |
+| [`dev/design/`](dev/design/) | Pistes de redesign explorées (Billet, Hublot, Radar), non retenues |
+| `dev/recipe_render.sh <dossier>` | Zippe la recette, l'importe dans LaraPaper en « FlightPoster (test) » et rapatrie les rendus de test |
+| `dev/recipe_test.php` | Cas de test rendus par `dev/recipe_render.sh` (formats, styles, météo, langues) |
+| `dev/migrate.php` | Applique la recette testée au plugin FlightPoster en place |
+| `dev/update_shared.php` | Met à jour uniquement le markup partagé du plugin en place |
+| `dev/palette_apply.php` + `dev/palette.json` | Palette 256 couleurs pour les écrans couleur sous LaraPaper |
 
-Les scripts visent un serveur LaraPaper en Docker joignable en SSH (`root@192.168.1.110`, conteneur `larapaper-app-1`).
+Les scripts visent un serveur LaraPaper en Docker joignable en SSH (conteneur `larapaper-app-1`), désigné par `LARAPAPER_SSH` (ex. `root@mon-serveur`), dans l'environnement ou dans `dev/.env` (ignoré par git). / The scripts target a LaraPaper server running in Docker over SSH (container `larapaper-app-1`), set with `LARAPAPER_SSH` (e.g. `root@my-server`) in the environment or in `dev/.env` (ignored by git).
+
+---
+
+## Licence / License
+
+Code sous licence [MIT](LICENSE). Les données affichées appartiennent à leurs sources respectives. / Code released under the [MIT](LICENSE) license. The data shown belongs to its respective sources.

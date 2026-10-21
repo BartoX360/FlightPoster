@@ -1,3 +1,7 @@
 .DS_Store
 # Captures de l'écran réel (montrent la position du domicile)
 previews/
+# Recette zippée, publiée dans les releases
+recipe/*.zip
+# Réglages locaux des scripts de développement
+dev/.env

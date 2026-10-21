@@ -6,7 +6,7 @@ Usage : build.py <fichier.layout> <dossier_sortie>
 import pathlib, shutil, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-SRC = HERE.parent / 'recipe' / 'src'
+SRC = HERE.parent.parent / 'recipe' / 'src'
 parts = {p.stem + p.suffix: p.read_text() for p in (HERE / 'parts').iterdir()}
 
 layout = pathlib.Path(sys.argv[1]).read_text()
