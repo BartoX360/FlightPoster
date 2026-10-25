@@ -339,6 +339,30 @@
     while (el.scrollWidth > el.clientWidth + 1 && size > min) { size *= 0.94; el.style.fontSize = size + 'px'; }
   }
 
+  // Les bases d'itinéraires associent un indicatif à une route fixe, souvent périmée (numéro réutilisé, vol retour…).
+  // On vérifie que l'avion est près de la ligne départ → arrivée et se dirige vers l'arrivée ; sinon on essaie la route
+  // inversée, puis on abandonne. Renvoie la route (éventuellement inversée) ou null.
+  function verify(rt, p) {
+    if (!rt || !rt.origin || !rt.destination) return null;
+    var o = rt.origin, d = rt.destination;
+    if (o.latitude == null || d.latitude == null) return rt;
+    function fits(a, b) {
+      var L = distKm(a.latitude, a.longitude, b.latitude, b.longitude), fromA = distKm(a.latitude, a.longitude, p.lat, p.lon);
+      var dt = rad(bearing(a.latitude, a.longitude, p.lat, p.lon) - bearing(a.latitude, a.longitude, b.latitude, b.longitude));
+      var ang = fromA / 6371, xt = Math.abs(Math.asin(Math.max(-1, Math.min(1, Math.sin(ang) * Math.sin(dt))))) * 6371;
+      var at = Math.acos(Math.max(-1, Math.min(1, Math.cos(ang) / Math.cos(xt / 6371)))) * 6371 * (Math.cos(dt) >= 0 ? 1 : -1);
+      var toB = distKm(p.lat, p.lon, b.latitude, b.longitude);
+      var head = Math.abs(((bearing(p.lat, p.lon, b.latitude, b.longitude) - (p.track || 0)) + 540) % 360 - 180);
+      // À basse altitude (départ, approche), l'avion peut déborder des aéroports et virer ; en croisière, non
+      var low = (p.alt_geom || p.alt_baro || 0) < 20000, tol = low ? 150 : 40;
+      if (xt > Math.max(250, 0.2 * L) || at < -tol || at > L + tol) return false;
+      return (Math.min(fromA, toB) < 150 && low) || p.track == null || head <= 100;
+    }
+    if (fits(o, d)) return rt;
+    if (fits(d, o)) return { airline: rt.airline, callsign_iata: rt.callsign_iata, origin: d, destination: o };
+    return null;
+  }
+
   function render(root) {
     root.setAttribute('data-done', '1');
     var q = function (s) { return root.querySelector(s); };
@@ -450,14 +474,17 @@
       var route = r[0] && r[0].response && r[0].response.flightroute, ac = r[1] && r[1].response && r[1].response.aircraft;
       // Secours : base de routes VRS (adsb.lol), numéro sans zéros de tête (AMX006 → AMX6)
       var cs = p.cs.replace(/^([A-Z]{3})0*(\d)/, '$1$2');
-      var routeP = route || !airlinerCs ? Promise.resolve(route) :
+      var checked = verify(route, p);
+      var routeP = checked || !airlinerCs ? Promise.resolve(checked) :
         getJSON('https://vrs-standing-data.adsb.lol/routes/' + cs.substr(0, 2) + '/' + cs + '.json', 3000).then(function (v) {
           var ap = v && v._airports;
           if (!ap || ap.length < 2) return null;
-          var leg = function (a) { return { municipality: a.location, iata_code: a.iata || a.icao }; };
-          return { airline: { icao: v.airline_code }, origin: leg(ap[0]), destination: leg(ap[ap.length - 1]) };
+          var leg = function (a) { return { municipality: a.location, iata_code: a.iata || a.icao, latitude: a.lat, longitude: a.lon }; };
+          return verify({ airline: { icao: v.airline_code }, origin: leg(ap[0]), destination: leg(ap[ap.length - 1]) }, p);
         });
       return routeP.then(function (rt) {
+        // Itinéraire incohérent partout : on garde la compagnie et le numéro, pas la fausse destination
+        if (!rt && route) rt = { airline: route.airline, callsign_iata: route.callsign_iata };
         var icao = (rt && rt.airline && rt.airline.icao) || (airlinerCs ? p.cs.substr(0, 3) : '');
         if ((rt && rt.airline && rt.airline.name) || !icao) return paint(rt, ac);
         var num = p.cs.match(/^[A-Z]{3}(\d+)$/), known = AIRLINES[icao];

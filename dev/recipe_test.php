@@ -12,10 +12,10 @@ $base = ['lat' => '45.7640', 'lon' => '4.8357', 'city' => 'Lyon', 'radius_km' =>
 $p->update(['name' => 'FlightPoster (test)', 'configuration' => $base + ['style' => 'eink', 'language' => 'en', 'units' => 'metric']]);
 echo "url=", $p->resolveLiquidVariables($p->polling_url), "\n";
 
-$near = ['hex' => '3965a3', 'flight' => 'AFR22   ', 'r' => 'F-HTYB', 't' => 'A359', 'desc' => 'AIRBUS A-350-900', 'category' => 'A5',
-  'alt_baro' => 7800, 'alt_geom' => 7835, 'gs' => 283, 'track' => 250, 'baro_rate' => 1600, 'lat' => 45.79, 'lon' => 4.87];
+$near = ['hex' => '394c0c', 'flight' => 'AFR53WL ', 'r' => 'F-GTAM', 't' => 'A321', 'desc' => 'AIRBUS A-321', 'category' => 'A3',
+  'alt_baro' => 34000, 'alt_geom' => 34600, 'gs' => 450, 'track' => 331, 'baro_rate' => 0, 'lat' => 45.80, 'lon' => 4.95];
 $far = array_merge($near, ['flight' => 'TVF8704 ', 'lat' => 46.35, 'lon' => 4.9, 'hex' => '39d30f', 'r' => 'F-HUYP', 't' => 'B738', 'desc' => 'BOEING 737-800']);
-$amx = array_merge($near, ['flight' => 'AMX006  ', 'hex' => '0d0e9c', 'r' => 'XA-ADL', 't' => 'B789', 'desc' => 'BOEING 787-9', 'track' => 80, 'alt_geom' => 36000, 'baro_rate' => 0, 'gs' => 480]);
+$amx = array_merge($near, ['flight' => 'AMX006  ', 'hex' => '0d0e9c', 'r' => 'XA-ADL', 't' => 'B789', 'desc' => 'BOEING 787-9', 'track' => 250, 'alt_geom' => 36000, 'baro_rate' => 0, 'gs' => 480]);
 $nje = array_merge($near, ['flight' => 'NJE278V ', 'hex' => '4951cd', 'r' => 'CS-PHJ', 't' => 'E55P', 'desc' => 'EMBRAER Phenom 300', 'category' => 'A2', 'baro_rate' => -1200]);
 $P = fn($ac, $code) => ['IDX_0' => ['aircraft' => $ac], 'IDX_1' => ['current' => ['weather_code' => $code, 'temperature_2m' => 14.2]]];
 $cases = [
