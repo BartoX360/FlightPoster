@@ -228,7 +228,7 @@
     'Palma De Mallorca': 'Palma', 'Palma de Mallorca': 'Palma', 'Saint Petersburg': 'Saint-Pétersbourg',
     'Bucharest': 'Bucarest', 'Barcelona': 'Barcelone', 'Frankfurt': 'Francfort', 'Hamburg': 'Hambourg', 'Stockholm': 'Stockholm',
     'Valencia': 'Valence', 'Turin': 'Turin', 'Genoa': 'Gênes', 'Tangier': 'Tanger', 'Fez': 'Fès', 'Antwerp': 'Anvers',
-    'Krakow': 'Cracovie', 'Dubrovnik': 'Dubrovnik', 'Reykjavik': 'Reykjavik', 'Mumbai': 'Bombay', 'Beirut': 'Beyrouth', 'Singapore': 'Singapour', 'The Hague': 'La Haye', 'Gothenburg': 'Göteborg', 'Malta': 'Malte'
+    'Krakow': 'Cracovie', 'Basel-Mulhouse': 'Bâle-Mulhouse', 'Dubrovnik': 'Dubrovnik', 'Reykjavik': 'Reykjavik', 'Mumbai': 'Bombay', 'Beirut': 'Beyrouth', 'Singapore': 'Singapour', 'The Hague': 'La Haye', 'Gothenburg': 'Göteborg', 'Malta': 'Malte'
   };
   // [dérive, bande 1, bande 2, liseré fuselage] — utilisé en mode couleur uniquement
   var LIVERIES = {
@@ -268,7 +268,7 @@
     BCY: ['CityJet', 'WX'], TOM: ['TUI Airways', 'BY'], DAL: ['Delta', 'DL'], UAL: ['United', 'UA'], AAL: ['American', 'AA'],
     ACA: ['Air Canada', 'AC'], ETD: ['Etihad', 'EY'], CFG: ['Condor', 'DE'], BEL: ['Brussels Airlines', 'SN'],
     AEE: ['Aegean', 'A3'], LOT: ['LOT', 'LO'], FIN: ['Finnair', 'AY'], AMX: ['Aeroméxico', 'AM'], AEA: ['Air Europa', 'UX'],
-    FDX: ['FedEx', 'FX'], UPS: ['UPS', '5X'], DHK: ['DHL', 'D0'], NJE: ['NetJets Europe', '1I'], OCN: ['Discover Airlines', '4Y'], CLH: ['Lufthansa CityLine', 'CL'],
+    FDX: ['FedEx', 'FX'], UPS: ['UPS', '5X'], DHK: ['DHL', 'D0'], NJE: ['NetJets Europe', '1I'], OCN: ['Discover Airlines', '4Y'], CCM: ['Air Corsica', 'XK'], CLH: ['Lufthansa CityLine', 'CL'],
     DLA: ['Air Dolomiti', 'EN'], EDW: ['Edelweiss', 'WK'], GWI: ['Eurowings', '4U'], SXS: ['SunExpress', 'XQ']
   };
 
@@ -361,6 +361,39 @@
     if (fits(o, d)) return rt;
     if (fits(d, o)) return { airline: rt.airline, callsign_iata: rt.callsign_iata, origin: d, destination: o };
     return null;
+  }
+
+  // Vol à plusieurs étapes (A-B-C) : on garde l'étape sur laquelle l'avion se trouve vraiment
+  function pickLeg(aps, p) {
+    for (var i = 0; i + 1 < aps.length; i++) {
+      var rt = verify({ origin: aps[i], destination: aps[i + 1] }, p);
+      if (rt) return rt;
+    }
+    return null;
+  }
+
+  // Aéroports VRS (fichiers CSV par préfixe OACI, ex. LF.csv) : ville, code IATA et coordonnées
+  var AIRPORT_FILES = {};
+  var CITY_BY_ICAO = { LFSB: 'Basel-Mulhouse', EDDF: 'Frankfurt', LFLL: 'Lyon', EGSS: 'London', EGKK: 'London', EGGW: 'London', EGLC: 'London' };
+  function airportInfo(icao) {
+    if (!/^[A-Z0-9]{4}$/.test(icao)) return Promise.resolve(null);
+    var key = icao.substr(0, 2);
+    if (!AIRPORT_FILES[key]) {
+      AIRPORT_FILES[key] = Promise.race([
+        fetch('https://raw.githubusercontent.com/vradarserver/standing-data/main/airports/schema-01/' + icao[0] + '/' + key + '.csv')
+          .then(function (res) { return res.ok ? res.text() : ''; }).catch(function () { return ''; }),
+        new Promise(function (res) { setTimeout(function () { res(''); }, 4000); })
+      ]);
+    }
+    return AIRPORT_FILES[key].then(function (csv) {
+      var line = csv.split('\n').filter(function (l) { return l.indexOf(icao + ',') === 0; })[0];
+      if (!line) return null;
+      var f = [], m, re = /("([^"]*)"|[^,]*)(,|$)/g;
+      while ((m = re.exec(line)) && f.length < 9) { f.push(m[2] != null ? m[2] : m[1]); if (!m[3]) break; }
+      var lat = parseFloat(f[6]), lon = parseFloat(f[7]);
+      if (isNaN(lat) || isNaN(lon)) return null;
+      return { municipality: CITY_BY_ICAO[icao] || f[4] || f[1], iata_code: f[3] || icao, latitude: lat, longitude: lon };
+    });
   }
 
   function render(root) {
@@ -467,22 +500,37 @@
       fit(q('.fp-route'));
     }
     paint(null, null);
-    var reqs = [p.cs ? getJSON('https://api.adsbdb.com/v0/callsign/' + encodeURIComponent(p.cs), 4000) : Promise.resolve(null),
-                getJSON('https://api.adsbdb.com/v0/aircraft/' + p.hex, 4000)];
     var airlinerCs = /^[A-Z]{3}\d/.test(p.cs);
+    var reqs = [p.cs ? getJSON('https://api.adsbdb.com/v0/callsign/' + encodeURIComponent(p.cs), 4000) : Promise.resolve(null),
+                getJSON('https://api.adsbdb.com/v0/aircraft/' + p.hex, 4000),
+                airlinerCs ? getJSON('https://hexdb.io/api/v1/route/icao/' + encodeURIComponent(p.cs), 4000) : Promise.resolve(null)];
     Promise.all(reqs).then(function (r) {
       var route = r[0] && r[0].response && r[0].response.flightroute, ac = r[1] && r[1].response && r[1].response.aircraft;
-      // Secours : base de routes VRS (adsb.lol), numéro sans zéros de tête (AMX006 → AMX6)
-      var cs = p.cs.replace(/^([A-Z]{3})0*(\d)/, '$1$2');
-      var checked = verify(route, p);
-      var routeP = checked || !airlinerCs ? Promise.resolve(checked) :
-        getJSON('https://vrs-standing-data.adsb.lol/routes/' + cs.substr(0, 2) + '/' + cs + '.json', 3000).then(function (v) {
+      var hex = r[2] && r[2].route;
+      var airline = { icao: airlinerCs ? p.cs.substr(0, 3) : '' };
+      // 1. hexdb : la base la plus à jour et la plus fiable ; villes et coordonnées depuis les aéroports VRS
+      var hexP = !hex || hex.indexOf('-') < 0 ? Promise.resolve(null) :
+        Promise.all(hex.split('-').map(airportInfo)).then(function (aps) {
+          var rt = pickLeg(aps.filter(Boolean), p);
+          if (rt) { rt.airline = (route && route.airline) || airline; rt.callsign_iata = route && route.callsign_iata; }
+          return rt;
+        });
+      return hexP.then(function (rt) {
+        // 2. adsbdb, 3. base de routes VRS (numéro sans zéros de tête : AMX006 → AMX6)
+        if (rt) return rt;
+        var checked = verify(route, p);
+        if (checked || !airlinerCs) return checked;
+        var cs = p.cs.replace(/^([A-Z]{3})0*(\d)/, '$1$2');
+        return getJSON('https://vrs-standing-data.adsb.lol/routes/' + cs.substr(0, 2) + '/' + cs + '.json', 3000).then(function (v) {
           var ap = v && v._airports;
           if (!ap || ap.length < 2) return null;
-          var leg = function (a) { return { municipality: a.location, iata_code: a.iata || a.icao, latitude: a.lat, longitude: a.lon }; };
-          return verify({ airline: { icao: v.airline_code }, origin: leg(ap[0]), destination: leg(ap[ap.length - 1]) }, p);
+          var vrt = pickLeg(ap.map(function (a) {
+            return { municipality: a.location, iata_code: a.iata || a.icao, latitude: a.lat, longitude: a.lon };
+          }), p);
+          if (vrt) vrt.airline = { icao: v.airline_code };
+          return vrt;
         });
-      return routeP.then(function (rt) {
+      }).then(function (rt) {
         // Itinéraire incohérent partout : on garde la compagnie et le numéro, pas la fausse destination
         if (!rt && route) rt = { airline: route.airline, callsign_iata: route.callsign_iata };
         var icao = (rt && rt.airline && rt.airline.icao) || (airlinerCs ? p.cs.substr(0, 3) : '');
